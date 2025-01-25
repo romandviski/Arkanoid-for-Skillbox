@@ -78,5 +78,7 @@ protected:
 	 * @param NewState Новый назначаемый мячику статус.
 	 */
 	void SetBallState(const EState NewState);
-	
+
+public:
+	FORCEINLINE int32 GetPower() const { return Power; }
 };

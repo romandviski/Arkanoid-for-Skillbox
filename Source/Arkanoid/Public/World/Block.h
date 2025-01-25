@@ -28,11 +28,15 @@ public:
 	ABlock();
 
 protected:
+	virtual void BeginPlay() override;
 	virtual void NotifyHit(class UPrimitiveComponent* MyComp, AActor* Other,
 		class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation,
 		FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
 
 public:
-	void Init(const FVector NewScale, const int32 LifeAmoun,
+	void Init(const FVector NewScale, const int32 LifeAmount,
 		const TSubclassOf<AActor> NewBonusClass = nullptr);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
+	TArray<UMaterialInterface*> LifeMaterials;
 };

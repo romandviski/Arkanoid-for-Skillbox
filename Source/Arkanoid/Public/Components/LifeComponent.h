@@ -16,7 +16,7 @@ public:
 	ULifeComponent();
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Setting")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Settings")
 	int32 Life = 1;
 
 public:
