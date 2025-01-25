@@ -227,3 +227,19 @@ void APaddle::BonusChangeLife(const int32 Amount)
 	Lives += Amount;
 	SpawnBallLives();
 }
+
+void APaddle::BonusChangeBallSpeed(const float Amount)
+{
+	if (IsValid(CurrentBall))
+	{
+		CurrentBall->ChangeSpeed(Amount);
+	}
+}
+
+void APaddle::BonusChangeBallPower(const int32 Amount, const float BonusTime)
+{
+	if (IsValid(CurrentBall))
+	{
+		CurrentBall->ChangeBallPower(Amount, BonusTime);
+	}
+}

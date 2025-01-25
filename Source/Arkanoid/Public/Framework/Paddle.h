@@ -86,4 +86,6 @@ protected:
 public:
 	void BonusChangeSize(const float AdditionalSize, const float BonusTime);
 	void BonusChangeLife(const int32 Amount);
+	void BonusChangeBallSpeed(const float Amount);
+	void BonusChangeBallPower(const int32 Amount, const float BonusTime);
 };
