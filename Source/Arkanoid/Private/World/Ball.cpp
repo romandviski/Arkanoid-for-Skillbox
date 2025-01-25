@@ -39,6 +39,7 @@ void ABall::BeginPlay()
 	Super::BeginPlay();
 	
 	Direction = GetActorForwardVector().GetSafeNormal();
+	SetBallState(EState::Moving);
 }
 
 // Called every frame
