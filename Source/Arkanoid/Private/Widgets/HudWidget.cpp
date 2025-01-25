@@ -52,7 +52,7 @@ void UHudWidget::UpdateTime()
 		int32 Milliseconds = 0;
 		GameState->GetGameTime(Minutes, Seconds, Milliseconds);
 
-		const FString TimeString = FString::Printf(TEXT("%02d : %02d : %02d"), Minutes, Seconds, Milliseconds);
-		CurrentScore->SetText(FText::FromString(TimeString));
+		const FString TimeString = FString::Printf(TEXT("%02d : %02d : %03d"), Minutes, Seconds, Milliseconds);
+		GameTime->SetText(FText::FromString(TimeString));
 	}
 }

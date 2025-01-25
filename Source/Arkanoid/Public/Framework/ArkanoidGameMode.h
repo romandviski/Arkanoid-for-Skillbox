@@ -21,5 +21,5 @@ public:
 	UFUNCTION(BlueprintCallable, Category="GameMode")
 	void GameStarted();
 	UFUNCTION(BlueprintCallable, Category="GameMode")
-	void GameEnded();
+	void GameEnded(const bool bIsWinner);
 };

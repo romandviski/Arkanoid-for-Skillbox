@@ -2,11 +2,12 @@
 
 
 #include "Framework/Paddle.h"
-
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Components/ArrowComponent.h"
 #include "Components/BoxComponent.h"
+#include "Framework/ArkanoidGameMode.h"
+#include "Framework/ArkanoidPC.h"
 #include "Kismet/GameplayStatics.h"
 #include "World/Ball.h"
 
@@ -138,7 +139,11 @@ void APaddle::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void APaddle::ExitGame()
 {
-	UGameplayStatics::OpenLevel(GetWorld(),"Menu", true);
+	//UGameplayStatics::OpenLevel(GetWorld(),"Menu", true);
+	if (const auto Pc = Cast<AArkanoidPC>(Controller))
+	{
+		Pc->ExitButtonPressed();	
+	}
 }
 
 void APaddle::StartGame()
@@ -192,6 +197,11 @@ void APaddle::BallIsDead()
 		BallLives[Lives - 1]->DestroyComponent();
 		BallLives.RemoveAt(Lives - 1);
 		UpdateBallLivesLocation();
+	}
+	else
+	{
+		if (const auto Gm = Cast<AArkanoidGameMode>(GetWorld()->GetAuthGameMode()))
+			Gm->GameEnded(false);
 	}
 }
 
