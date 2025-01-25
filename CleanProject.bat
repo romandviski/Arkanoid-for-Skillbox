@@ -9,6 +9,7 @@ rem Visual Studio Code
 del /Q .vscode
 rd /S /Q .vscode
 del /Q *.code-workspace
+del /Q .vsconfig
 
 rem Rider
 del /Q .idea
