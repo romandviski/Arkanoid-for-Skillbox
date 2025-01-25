@@ -40,7 +40,12 @@ private:
 	UInputAction* SpawnBallAction = nullptr;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings | Input", meta=(AllowPrivateAccess=true))
 	UInputAction* MoveAction = nullptr;
-	
+
+	UPROPERTY()
+	TArray<UStaticMeshComponent*> BallLives;
+	void SpawnBallLives();
+	void UpdateBallLivesLocation();
+		
 public:
 	APaddle();
 
@@ -56,6 +61,11 @@ protected:
 	void StartGame();
 	UFUNCTION()
 	void Move(const FInputActionValue& Value);
+
+	UFUNCTION()
+	void SpawnBall();
+	UFUNCTION()
+	void BallIsDead();
 	
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "Settings | Game", meta=(tooltip="Класс мяча для спавна"))
