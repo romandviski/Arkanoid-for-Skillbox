@@ -8,7 +8,10 @@ public class Arkanoid : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" });
+		PublicDependencyModuleNames.AddRange(new string[]
+		{
+			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "UMG"
+		});
 
 		// Чиним инклюды из подпапок проекта
 		PublicIncludePaths.AddRange(new string[]
