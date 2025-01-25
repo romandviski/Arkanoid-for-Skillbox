@@ -2,8 +2,12 @@
 
 
 #include "Framework/Paddle.h"
+
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "Components/ArrowComponent.h"
 #include "Components/BoxComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 
 APaddle::APaddle()
@@ -48,7 +52,15 @@ void APaddle::OnConstruction(const FTransform& Transform)
 void APaddle::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
+	{
+		const auto Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
+		if (Subsystem)
+		{
+			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+		}
+	}
 }
 
 // Called to bind functionality to input
@@ -56,5 +68,33 @@ void APaddle::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	const auto EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+	if (EnhancedInputComponent)
+	{
+		EnhancedInputComponent->BindAction(EscapeAction, ETriggerEvent::Started, this, &APaddle::ExitGame);
+		EnhancedInputComponent->BindAction(SpawnBallAction, ETriggerEvent::Started, this, &APaddle::StartGame);
+		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APaddle::Move);
+	}
+}
+
+void APaddle::ExitGame()
+{
+	UGameplayStatics::OpenLevel(GetWorld(),"Menu", true);
+}
+
+void APaddle::StartGame()
+{
+	
+}
+
+void APaddle::Move(const FInputActionValue& Value)
+{
+	const FVector2D AxisVector = Value.Get<FVector2D>();
+
+	if (Controller)
+	{
+		const float CurrentSpeed = AxisVector.X * Speed * UGameplayStatics::GetWorldDeltaSeconds(GetWorld());
+		AddActorWorldOffset(FVector(0.0f, CurrentSpeed, 0.0f), true);
+	}
 }
 

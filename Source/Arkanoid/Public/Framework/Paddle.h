@@ -6,6 +6,8 @@
 #include "GameFramework/Pawn.h"
 #include "Paddle.generated.h"
 
+class UInputAction;
+class UInputMappingContext;
 class ABall;
 class UArrowComponent;
 class UBoxComponent;
@@ -29,6 +31,15 @@ private:
 
 	UPROPERTY()
 	ABall* CurrentBall = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings | Input", meta=(AllowPrivateAccess=true))
+	UInputMappingContext* DefaultMappingContext = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings | Input", meta=(AllowPrivateAccess=true))
+	UInputAction* EscapeAction = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings | Input", meta=(AllowPrivateAccess=true))
+	UInputAction* SpawnBallAction = nullptr;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings | Input", meta=(AllowPrivateAccess=true))
+	UInputAction* MoveAction = nullptr;
 	
 public:
 	APaddle();
@@ -39,6 +50,13 @@ protected:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UFUNCTION()
+	void ExitGame();
+	UFUNCTION()
+	void StartGame();
+	UFUNCTION()
+	void Move(const FInputActionValue& Value);
+	
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "Settings | Game", meta=(tooltip="Класс мяча для спавна"))
 	TSubclassOf<ABall> BallClass = nullptr;
