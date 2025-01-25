@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Block.generated.h"
 
+class ABonusParent;
 class ULifeComponent;
 
 UCLASS()
@@ -21,7 +22,7 @@ private:
 		meta = (AllowPrivateAccess = "true"))
 	ULifeComponent* LifeComponent = nullptr;
 
-	TSubclassOf<AActor> BonusClass = nullptr;
+	TSubclassOf<ABonusParent> BonusClass = nullptr;
 	
 public:	
 	// Sets default values for this actor's properties
@@ -35,7 +36,7 @@ protected:
 
 public:
 	void Init(const FVector NewScale, const int32 LifeAmount,
-		const TSubclassOf<AActor> NewBonusClass = nullptr);
+		const TSubclassOf<ABonusParent> NewBonusClass = nullptr);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
 	TArray<UMaterialInterface*> LifeMaterials;

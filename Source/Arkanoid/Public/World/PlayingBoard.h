@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "PlayingBoard.generated.h"
 
+class ABonusParent;
 class ABlock;
 
 USTRUCT(BlueprintType)
@@ -14,7 +15,7 @@ struct FBonusTypeChance
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<AActor> BonusClass = nullptr;
+	TSubclassOf<ABonusParent> BonusClass = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(ClampMin="0.0", ClampMax="1"))
 	float DropChance = 0.2f;
 };
@@ -46,7 +47,7 @@ protected:
 	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void BeginPlay() override;
 	
-	TSubclassOf<AActor> GetBonusClass();
+	TSubclassOf<ABonusParent> GetBonusClass();
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings | Base", meta = (ToolTip = "Блюпринт кубика"))
@@ -70,4 +71,6 @@ public:
 	float BonusChance = 0.2f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings | Game")
 	TArray<FBonusTypeChance> BonusTypeByChance;
+
+	void BonusDestroyCubes(const int32 Amount);
 };
