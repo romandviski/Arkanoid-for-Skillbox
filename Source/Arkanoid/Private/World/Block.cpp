@@ -42,8 +42,8 @@ void ABlock::NotifyHit(class UPrimitiveComponent* MyComp, AActor* Other, class U
 			{
 				if (BonusClass && GetWorld())
 				{
-					auto CurrentBonus = GetWorld()->SpawnActor<ABonusParent>(BonusClass, GetActorLocation(), GetActorRotation());
-					CurrentBonus->InitScale(GetActorScale3D());
+					const auto CurrentBonus = GetWorld()->SpawnActor<ABonusParent>(BonusClass, GetActorLocation(), GetActorRotation());
+					//CurrentBonus->InitScale(GetActorScale3D());
 				}
 
 				if (const auto Pawn = Cast<APawn>(Other->GetOwner()))

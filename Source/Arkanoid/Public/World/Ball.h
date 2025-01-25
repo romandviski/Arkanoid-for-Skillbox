@@ -52,6 +52,8 @@ private:
 	UStaticMeshComponent* StaticMesh = nullptr;
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components, meta = (AllowPrivateAccess = "true"))
     UArrowComponent* ForwardArrow = nullptr;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components, meta = (AllowPrivateAccess = "true"))
+	UAudioComponent* AudioComponent = nullptr;
 
 	int32 Power = 1;
 	float Speed = 0.0f;

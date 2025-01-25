@@ -3,6 +3,7 @@
 
 #include "World/Ball.h"
 #include "Components/ArrowComponent.h"
+#include "Components/AudioComponent.h"
 
 
 // Sets default values
@@ -15,6 +16,10 @@ ABall::ABall()
 
 	ForwardArrow = CreateDefaultSubobject<UArrowComponent>(TEXT("Forward Arrow"));
 	ForwardArrow->SetupAttachment(StaticMesh);
+
+	AudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("AudioComponent"));
+	AudioComponent->SetupAttachment(StaticMesh);
+	AudioComponent->SetAutoActivate(false);
 
 	// Загружаем статичный меш сферы (заполнять лучше в блюпринтах)
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMeshAsset(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
@@ -82,6 +87,8 @@ void ABall::Move(const float DeltaTime)
 
 	if (HitResult.bBlockingHit)
 	{
+		AudioComponent->Play();
+		
 		/*
 		Формула для вычисления отраженного вектора выглядит так:
 		ReflectedDirection = Direction − 2 * (Direction ⋅ Normal) * Normal

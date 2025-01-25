@@ -17,6 +17,9 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	int32 AmountPlayingBoards = 0;
+	void CalculatePlayingBoard();
+
 public:
 	UFUNCTION(BlueprintCallable, Category="GameMode")
 	void GameStarted();
