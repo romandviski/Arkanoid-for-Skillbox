@@ -41,3 +41,9 @@
 <div id="header" align="center">
   <img src="https://cdn.skillbox.pro/landgen/blocks/start-screen/414896/lg/851759b5-3231-433f-bf10-df4d9ab0d5ed.webp" width="500"/>
 </div>
+
+<h3 align="center">
+  <a href="https://skillbox.ru/media/gamedev/story-mihail-efremov" target="_blank" rel="noreferrer" style="display: block; text-align: center;">
+    Дорога возникает под шагами идущего!
+  </a>
+</h3>
