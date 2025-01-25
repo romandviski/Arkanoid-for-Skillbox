@@ -2,6 +2,8 @@
 
 
 #include "World/Block.h"
+
+#include "Components/LifeComponent.h"
 #include "World/Ball.h"
 
 // Sets default values
@@ -11,6 +13,8 @@ ABlock::ABlock()
 
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
 	SetRootComponent(StaticMesh);
+
+	LifeComponent = CreateDefaultSubobject<ULifeComponent>(TEXT("Life Component"));
 }
 
 void ABlock::NotifyHit(class UPrimitiveComponent* MyComp, AActor* Other, class UPrimitiveComponent* OtherComp,

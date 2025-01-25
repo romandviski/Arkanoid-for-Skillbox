@@ -6,14 +6,20 @@
 #include "GameFramework/Actor.h"
 #include "Block.generated.h"
 
+class ULifeComponent;
+
 UCLASS()
 class ARKANOID_API ABlock : public AActor
 {
 	GENERATED_BODY()
+	
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components,
 		meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* StaticMesh = nullptr;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Components,
+		meta = (AllowPrivateAccess = "true"))
+	ULifeComponent* LifeComponent = nullptr;
 
 	TSubclassOf<AActor> BonusClass = nullptr;
 	
