@@ -76,4 +76,14 @@ public:
 	FVector DefaultScale = FVector(0.4f, 2.4f, 0.5);
 	UPROPERTY(EditDefaultsOnly, Category = "Settings | Game")
 	float Speed = 2000.0f;
+
+// Работа с бонусами
+protected:
+	FTimerHandle TimerForBonusSize;
+	UFUNCTION()
+	void SetDefaultSize();
+	
+public:
+	void BonusChangeSize(const float AdditionalSize, const float BonusTime);
+	void BonusChangeLife(const int32 Amount);
 };
