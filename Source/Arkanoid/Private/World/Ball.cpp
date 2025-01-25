@@ -100,7 +100,7 @@ void ABall::Move(const float DeltaTime)
 		// выведем скорость для дебага
 		// https://www.chrismccole.com/blog/logging-in-ue4-cpp
 		// https://unrealcommunity.wiki/logging-lgpidy6i
-		UE_LOG(LogTemp, Warning, TEXT("Ball name %s is speed %f"), *GetName(), Speed);
+		//UE_LOG(LogTemp, Warning, TEXT("Ball name %s is speed %f"), *GetName(), Speed);
 	}
 }
 

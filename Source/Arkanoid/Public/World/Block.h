@@ -23,6 +23,7 @@ private:
 	ULifeComponent* LifeComponent = nullptr;
 
 	TSubclassOf<ABonusParent> BonusClass = nullptr;
+	int32 MaxLife = 1;
 	
 public:	
 	// Sets default values for this actor's properties
@@ -37,6 +38,9 @@ protected:
 public:
 	void Init(const FVector NewScale, const int32 LifeAmount,
 		const TSubclassOf<ABonusParent> NewBonusClass = nullptr);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
+	int32 ScoreByLife = 25;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
 	TArray<UMaterialInterface*> LifeMaterials;
