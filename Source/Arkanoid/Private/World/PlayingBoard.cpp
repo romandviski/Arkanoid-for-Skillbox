@@ -4,6 +4,8 @@
 #include "World/PlayingBoard.h"
 #include "Bonuses/BonusParent.h"
 #include "Framework/ArkanoidGameMode.h"
+#include "Framework/Paddle.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "World/Block.h"
 
@@ -128,7 +130,12 @@ void APlayingBoard::SpawnBlockActors()
 
 void APlayingBoard::OnBlockDestroyed(AActor* DestroyedBlock)
 {
-	BlockActors.Remove(Cast<ABlock>(DestroyedBlock));
+	ABlock* Block = Cast<ABlock>(DestroyedBlock);
+	if (Block)
+	{
+		BlockActors.Remove(Block);
+		InitialBlockLocations.Remove(Block); // Очищаем уничтоженный блок
+	}
 
 	if (!BlockActors.Num())
 	{
@@ -137,15 +144,50 @@ void APlayingBoard::OnBlockDestroyed(AActor* DestroyedBlock)
 			GM->GameEnded(true);
 		}	
 	}
+	else if (BlockActors.Num() == BlocksToSlide  && !bIsDroppingBlocks) // Проверяем количество блоков
+	{
+		// Запускаем таймер
+		GetWorld()->GetTimerManager().SetTimer(
+			DropBlocksTimerHandle,
+			this,
+			&APlayingBoard::StartDroppingBlocks,
+			DropTime, // Проверка каждые 10 секунд
+			true // Повторяющийся таймер
+		);
+
+		StartDroppingBlocks();
+	}
+}
+
+void APlayingBoard::StartDroppingBlocks()
+{
+	if (!bIsDroppingBlocks) // Проверяем, что опускание ещё не началось
+	{
+		bIsDroppingBlocks = true;
+		DropElapsedTime = 0.0f; // Сбрасываем время
+
+		// Сохраняем начальные позиции блоков
+		InitialBlockLocations.Empty();
+		for (ABlock* Block : BlockActors)
+		{
+			if (Block)
+			{
+				InitialBlockLocations.Add(Block, Block->GetActorLocation());
+			}
+		}
+
+		// Вычисляем целевую позицию для опускания
+		TargetDropLocation = FVector(-OneBlockHeight, 0.0f, 0.0f);
+	}
 }
 
 APlayingBoard::APlayingBoard()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("Scene Root"));
 	SetRootComponent(SceneRoot);
-
+	
 }
 
 void APlayingBoard::BeginPlay()
@@ -154,6 +196,61 @@ void APlayingBoard::BeginPlay()
 
 	SpawnBlockActors();
 	ClearPreviewComponents();
+
+	const auto Paddle = UGameplayStatics::GetActorOfClass(GetWorld(), APaddle::StaticClass());
+	if (Paddle)
+		KillX = Paddle->GetActorLocation().X + 100.0f;
+
+	OneBlockHeight = BlockScale.Y * 50.0f; // Высота одного блока
+
+	// таймер для старта автоспуска
+	/* 
+	GetWorld()->GetTimerManager().SetTimer(
+		DropBlocksTimerHandle,
+		this,
+		&APlayingBoard::StartDroppingBlocks,
+		1.0f, // Проверка каждые 10 секунд
+		true // Повторяющийся таймер
+	);
+	*/
+}
+
+void APlayingBoard::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (bIsDroppingBlocks)
+	{
+		DropElapsedTime += DeltaTime;
+
+		// Вычисляем прогресс опускания (от 0 до 1)
+		float Alpha = FMath::Clamp(DropElapsedTime / DropDuration, 0.0f, 1.0f);
+
+		// Плавно опускаем блоки
+		for (auto& BlockPair : InitialBlockLocations)
+		{
+			const auto Block = BlockPair.Key;
+			if (Block)
+			{
+				FVector NewLocation = FMath::Lerp(BlockPair.Value, BlockPair.Value + TargetDropLocation, Alpha);
+				if (NewLocation.X <= KillX)
+				{
+					Block->Destroy();
+				}
+				else				
+				{
+					Block->SetActorLocation(NewLocation);
+				}
+			}
+		}
+
+		// Если опускание завершено
+		if (Alpha >= 1.0f)
+		{
+			bIsDroppingBlocks = false;
+			InitialBlockLocations.Empty();
+		}
+	}
 }
 
 TSubclassOf<ABonusParent> APlayingBoard::GetBonusClass()

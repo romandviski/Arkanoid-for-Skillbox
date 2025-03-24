@@ -45,7 +45,10 @@ private:
 	TArray<UStaticMeshComponent*> BallLives;
 	void SpawnBallLives();
 	void UpdateBallLivesLocation();
-		
+	
+	float DirectionAxis = 0.0f;
+	bool bIsSticky = false;
+	
 public:
 	APaddle();
 
@@ -55,6 +58,8 @@ protected:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	virtual void NotifyHit(class UPrimitiveComponent* MyComp, AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit) override;
+	
 	UFUNCTION()
 	void ExitGame();
 	UFUNCTION()
@@ -73,19 +78,30 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Settings | Game")
 	int32 Lives = 3;
 	UPROPERTY(EditDefaultsOnly, Category = "Settings | Game")
-	FVector DefaultScale = FVector(0.4f, 2.4f, 0.5);
+	FVector DefaultScale = FVector(0.4f, 2.4f, 0.5f);
 	UPROPERTY(EditDefaultsOnly, Category = "Settings | Game")
 	float Speed = 2000.0f;
 
+	float GetDirectionAxis() const {return DirectionAxis;}
+	
 // Работа с бонусами
 protected:
 	FTimerHandle TimerForBonusSize;
 	UFUNCTION()
 	void SetDefaultSize();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void PlayBonusStickyEffect();
+	UFUNCTION(BlueprintImplementableEvent)
+	void StopBonusStickyEffect();
 	
 public:
 	void BonusChangeSize(const float AdditionalSize, const float BonusTime);
 	void BonusChangeLife(const int32 Amount);
 	void BonusChangeBallSpeed(const float Amount);
 	void BonusChangeBallPower(const int32 Amount, const float BonusTime);
+	void BonusBall(const float BallLifeTime) const;
+	void BonusManyBalls(const float BallsLifeTime) const;
+	void BonusSticky();
+	
 };

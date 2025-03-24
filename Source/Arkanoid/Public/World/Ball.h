@@ -100,4 +100,5 @@ public:
 	void SetBallState(const EState NewState);
 	void ChangeSpeed(const float Amount);
 	void ChangeBallPower(const int32 Amount, const float BonusTime);
+	void SetBallBonus(const float BallLifeTime = 10.0f);
 };

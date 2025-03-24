@@ -40,12 +40,33 @@ private:
 	UFUNCTION()
 	void OnBlockDestroyed(AActor* DestroyedBlock);
 	
+	// Флаг, указывающий, что блоки опускаются
+	bool bIsDroppingBlocks = false;
+	// Таймер для опускания блоков =)
+	FTimerHandle DropBlocksTimerHandle;
+	// Время, за которое блоки опускаются
+	float DropDuration = 1.0f;
+	// Блоки опускаються с промежутком
+	float DropTime = 1.0f;
+	float DropElapsedTime = 0.0f;
+	// Целевая позиция для опускания
+	FVector TargetDropLocation;
+	// Высота каретки
+	float KillX = 0.0f;
+	// Высота одного блока
+	float OneBlockHeight;
+	// Начальная позиция блоков перед опусканием
+	TMap<ABlock*, FVector> InitialBlockLocations;
+	UFUNCTION()
+	void StartDroppingBlocks();
+	
 public:	
 	APlayingBoard();
 
 protected:
 	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 	
 	TSubclassOf<ABonusParent> GetBonusClass();
 
@@ -65,6 +86,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings | Base")
 	int32 SpacingY = 60;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings | Game")
+	int32 BlocksToSlide = 5;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings | Game", meta=(ClampMin="0.0", ClampMax="1"))
 	float GameDifficulty = 0.2f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings | Game", meta=(ClampMin="0.0", ClampMax="1"))

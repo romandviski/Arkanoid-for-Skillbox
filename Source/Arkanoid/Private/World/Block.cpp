@@ -14,6 +14,8 @@ ABlock::ABlock()
 	PrimaryActorTick.bCanEverTick = false;
 
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
+	StaticMesh->SetCollisionProfileName(TEXT("BlockAll"));
+	StaticMesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore); 
 	SetRootComponent(StaticMesh);
 
 	LifeComponent = CreateDefaultSubobject<ULifeComponent>(TEXT("Life Component"));

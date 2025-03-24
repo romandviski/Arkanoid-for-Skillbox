@@ -22,7 +22,7 @@ void APaddle::SpawnBallLives()
 		return;
 	}
 
-	for (auto BallLive : BallLives)
+	for (const auto BallLive : BallLives)
 	{
 		BallLive->DestroyComponent();
 	}
@@ -36,7 +36,7 @@ void APaddle::SpawnBallLives()
 			NewMeshComponent->SetStaticMesh(Mesh);
 			NewMeshComponent->SetMaterial(0, Material);
 			NewMeshComponent->SetAbsolute(false, false,true);
-			NewMeshComponent->SetWorldScale3D(FVector(0.5f));
+			NewMeshComponent->SetWorldScale3D(FVector(0.3f));
 			NewMeshComponent->SetupAttachment(StaticMesh);
 			NewMeshComponent->RegisterComponent();
 
@@ -52,6 +52,10 @@ void APaddle::UpdateBallLivesLocation()
 	// Симметричное расположение шариков, constexpr - вычисляется на этапе компиляции
 	constexpr float BallSpacing = 30.0f; // Расстояние между шариками
 	const int8 NumBalls = BallLives.Num(); // Количество шариков
+
+	// Учитываем масштаб каретки по оси Y
+	const float PaddleScaleY = GetActorScale().Y;
+	
 	// Рассчитываем начальное смещение для симметричного расположения
 	const float TotalWidth = (NumBalls - 1) * BallSpacing; // Общая ширина расположения шариков
 	const float StartOffset = -TotalWidth / 2; // Начальное смещение для первого шарика
@@ -62,7 +66,7 @@ void APaddle::UpdateBallLivesLocation()
 		const float Offset = StartOffset + i * BallSpacing;
 		if(IsValid(BallLives[i]))
 		{
-			BallLives[i]->SetRelativeLocation(FVector(-100, Offset, 0.0f));
+			BallLives[i]->SetRelativeLocation(FVector(-100, Offset / PaddleScaleY, 0.0f));
 		}
 	}
 }
@@ -137,6 +141,22 @@ void APaddle::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	}
 }
 
+void APaddle::NotifyHit(class UPrimitiveComponent* MyComp, AActor* Other, class UPrimitiveComponent* OtherComp, bool bSelfMoved, FVector HitLocation, FVector HitNormal, FVector NormalImpulse, const FHitResult& Hit)
+{
+	if (bIsSticky && Other)
+	{
+		if (CurrentBall == Cast<ABall>(Other))
+		{
+			CurrentBall->SetBallState(EState::Idle);
+			CurrentBall->SetActorLocation(Arrow->GetComponentLocation());
+			CurrentBall->AttachToComponent(Arrow, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+		}
+		
+		bIsSticky = false;
+	}
+}
+
+
 void APaddle::ExitGame()
 {
 	//UGameplayStatics::OpenLevel(GetWorld(),"Menu", true);
@@ -152,6 +172,8 @@ void APaddle::StartGame()
 	{
 		CurrentBall->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 		CurrentBall->SetBallState(EState::Moving);
+		StopBonusStickyEffect();
+		bIsSticky = false;
 	}
 }
 
@@ -161,7 +183,9 @@ void APaddle::Move(const FInputActionValue& Value)
 
 	if (Controller)
 	{
-		const float CurrentSpeed = AxisVector.X * Speed * UGameplayStatics::GetWorldDeltaSeconds(GetWorld());
+		DirectionAxis = AxisVector.X;
+		
+		const float CurrentSpeed = DirectionAxis * Speed * UGameplayStatics::GetWorldDeltaSeconds(GetWorld());
 		AddActorWorldOffset(FVector(0.0f, CurrentSpeed, 0.0f), true);
 	}
 }
@@ -209,6 +233,8 @@ void APaddle::SetDefaultSize()
 {
 	SetActorScale3D(DefaultScale);
 	BoxCollider->SetBoxExtent(FVector(25.0f, 50.0f + 20.0f / DefaultScale.Y, 25.0f));
+	// Обновляем позиции шариков жизни
+	UpdateBallLivesLocation();
 }
 
 void APaddle::BonusChangeSize(const float AdditionalSize, const float BonusTime)
@@ -221,6 +247,8 @@ void APaddle::BonusChangeSize(const float AdditionalSize, const float BonusTime)
 			TempScale.Y = TempScale.Y + TempScale.Y * AdditionalSize;
 			SetActorScale3D(TempScale);
 			BoxCollider->SetBoxExtent(FVector(25.0f, 50.0f + 20.0f / TempScale.Y, 25.0f));
+			// Обновляем позиции шариков жизни
+			UpdateBallLivesLocation();
 		}
 
 		GetWorld()->GetTimerManager().SetTimer(
@@ -252,4 +280,56 @@ void APaddle::BonusChangeBallPower(const int32 Amount, const float BonusTime)
 	{
 		CurrentBall->ChangeBallPower(Amount, BonusTime);
 	}
+}
+
+void APaddle::BonusBall(const float BallLifeTime) const
+{
+	if (BallClass)
+	{
+		FVector SpawnLocation = Arrow->GetComponentLocation();
+		const FRotator SpawnRotation = Arrow->GetComponentRotation();
+
+		if (IsValid(CurrentBall))
+			SpawnLocation.X = SpawnLocation.X + 50.0f;
+		
+		const auto BonusBall = GetWorld()->SpawnActor<ABall>(BallClass, SpawnLocation, SpawnRotation);
+		if (BonusBall)
+			BonusBall->SetBallBonus(BallLifeTime);
+	}
+}
+
+void APaddle::BonusManyBalls(const float BallsLifeTime) const
+{
+	if (BallClass && CurrentBall)
+	{
+		// Количество акторов для спавна
+		constexpr int8 NumBalls = 10;
+		// Радиус круга
+		constexpr float Radius = 100.0f;
+
+		const FVector SpawnerLocation = CurrentBall->GetActorLocation();
+
+		for (int8 i = 0; i < NumBalls; ++i)
+		{
+			// Случайный угол для направления шарика
+			const float Angle = FMath::FRandRange(0.0f, 2 * PI);
+			// Вычисляем позицию по кругу
+			FVector Offset(Radius * FMath::Cos(Angle), Radius * FMath::Sin(Angle), 0.0f);
+			FVector SpawnLocation = SpawnerLocation + Offset;
+
+			// Ротируем актор в направлении от центра круга
+			FRotator SpawnRotation = (SpawnLocation - SpawnerLocation).Rotation();
+
+			// Спавним актор
+			const auto SpawnedBall = GetWorld()->SpawnActor<ABall>(BallClass, SpawnLocation, SpawnRotation);
+			if (SpawnedBall)
+				SpawnedBall->SetBallBonus(BallsLifeTime);
+		}
+	}
+}
+
+void APaddle::BonusSticky()
+{
+	bIsSticky = true;
+	PlayBonusStickyEffect();
 }

@@ -4,16 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "BonusParent.h"
-#include "BonusPaddleSize.generated.h"
+#include "BonusBall.generated.h"
 
 UCLASS()
-class ARKANOID_API ABonusPaddleSize : public ABonusParent
+class ARKANOID_API ABonusBall : public ABonusParent
 {
 	GENERATED_BODY()
-
 public:
-	ABonusPaddleSize();
-
+	ABonusBall();
+	
 protected:
 	virtual void BonusAction(APaddle* Paddle) override;
 	

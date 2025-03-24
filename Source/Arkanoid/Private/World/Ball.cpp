@@ -4,6 +4,7 @@
 #include "World/Ball.h"
 #include "Components/ArrowComponent.h"
 #include "Components/AudioComponent.h"
+#include "Framework/Paddle.h"
 
 
 // Sets default values
@@ -13,7 +14,14 @@ ABall::ABall()
 
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
 	SetRootComponent(StaticMesh);
-
+	
+	//StaticMesh->SetCollisionProfileName(TEXT("BlockAllDynamic"));
+	StaticMesh->SetCollisionObjectType(ECC_WorldDynamic);
+	StaticMesh->SetCollisionResponseToAllChannels(ECR_Overlap);
+	// Если нужно изменить конкретные каналы:
+	StaticMesh->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block); // Блокировать статические объекты
+	StaticMesh->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block); 
+	
 	ForwardArrow = CreateDefaultSubobject<UArrowComponent>(TEXT("Forward Arrow"));
 	ForwardArrow->SetupAttachment(StaticMesh);
 
@@ -85,24 +93,53 @@ void ABall::Move(const float DeltaTime)
 	FHitResult HitResult;
 	AddActorWorldOffset(Offset, true, &HitResult);
 
+	// Вращение меша шара
+	if (StaticMesh)
+	{
+		// Вычисляем угловую скорость (вращение) в зависимости от скорости и радиуса шара
+		const float BallRadius = StaticMesh->Bounds.SphereRadius; // Получаем радиус шара
+		const float AngularVelocity = (Speed / BallRadius) * 0.5f; // Угловая скорость с коэффициентом
+
+		// Вектор оси вращения (перпендикулярно направлению движения)
+		const FVector RotationAxis = FVector::CrossProduct(FVector::UpVector, Direction).GetSafeNormal();
+
+		// Вычисляем угол вращения в радианах
+		const float RotationAngle = AngularVelocity * DeltaTime;
+
+		// Создаем кватернион вращения
+		const FQuat DeltaRotation = FQuat(RotationAxis, RotationAngle);
+
+		// Применяем вращение к мешу в мировых координатах
+		StaticMesh->AddWorldRotation(DeltaRotation);
+	}
+	
 	if (HitResult.bBlockingHit)
 	{
 		AudioComponent->Play();
-		
+
 		/*
-		Формула для вычисления отраженного вектора выглядит так:
-		ReflectedDirection = Direction − 2 * (Direction ⋅ Normal) * Normal
-		(в выражении (Direction ⋅ Normal) используется скалярное произведение!)
+		*	Формула для вычисления отраженного вектора выглядит так:
+		*	ReflectedDirection = Direction − 2 * (Direction ⋅ Normal) * Normal
+		*	(в выражении (Direction ⋅ Normal) используется скалярное произведение!)
 		*/
 		Direction = Direction - 2 * (FVector::DotProduct(Direction, HitResult.Normal)) * HitResult.Normal;
+		
+		const auto GamePaddle = Cast<APaddle>(HitResult.GetActor());
+		if (GamePaddle)
+		{
+			Direction.Y += GamePaddle->GetDirectionAxis();
+		}
+		else
+		{
+			if (Speed < InitParameters.MaxSpeed)
+			{
+				Speed += InitParameters.Speed * 0.01f;
+				Speed = FMath::Min(Speed, InitParameters.MaxSpeed);
+			}
+		}
+		
 		Direction.Z = 0.0f;
 		Direction = Direction.GetSafeNormal();
-
-		if (Speed < InitParameters.MaxSpeed)
-		{
-			Speed += InitParameters.Speed * 0.1f;
-			Speed = FMath::Min(Speed, InitParameters.MaxSpeed);
-		}
 		
 		// выведем скорость для дебага
 		// https://www.chrismccole.com/blog/logging-in-ue4-cpp
@@ -169,4 +206,18 @@ void ABall::ChangeBallPower(const int32 Amount, const float BonusTime)
 			BonusTime,
 			true);
 	}
+}
+
+void ABall::SetBallBonus(const float BallLifeTime)
+{
+	if (StaticMesh)
+	{
+		StaticMesh->SetVectorParameterValueOnMaterials(
+			"Emissive color 01", FVector(40.0f, 40.0f, 0.03f));
+		StaticMesh->SetVectorParameterValueOnMaterials(
+			"Emissive color 02", FVector(40.0f, 40.0f, 0.03f));
+	}
+
+	SetActorScale3D(FVector(0.3f));
+	SetLifeSpan(BallLifeTime);
 }
