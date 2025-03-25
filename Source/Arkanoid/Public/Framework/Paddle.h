@@ -54,6 +54,9 @@ public:
 
 protected:
 	virtual void OnConstruction(const FTransform& Transform) override;
+	// Вызывается после изменений в редакторе
+	// Например, когда вы изменяете значение свойства в панели Details в Unreal Editor.
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	virtual void BeginPlay() override;
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -73,13 +76,13 @@ protected:
 	void BallIsDead();
 	
 public:
-	UPROPERTY(EditDefaultsOnly, Category = "Settings | Game", meta=(tooltip="Класс мяча для спавна"))
+	UPROPERTY(EditAnywhere, Category = "Settings | Game", meta=(tooltip="Класс мяча для спавна"))
 	TSubclassOf<ABall> BallClass = nullptr;
-	UPROPERTY(EditDefaultsOnly, Category = "Settings | Game")
+	UPROPERTY(EditAnywhere, Category = "Settings | Game")
 	int32 Lives = 3;
-	UPROPERTY(EditDefaultsOnly, Category = "Settings | Game")
+	UPROPERTY(EditAnywhere, Category = "Settings | Game")
 	FVector DefaultScale = FVector(0.4f, 2.4f, 0.5f);
-	UPROPERTY(EditDefaultsOnly, Category = "Settings | Game")
+	UPROPERTY(EditAnywhere, Category = "Settings | Game")
 	float Speed = 2000.0f;
 
 	float GetDirectionAxis() const {return DirectionAxis;}

@@ -145,6 +145,30 @@ void ABall::Move(const float DeltaTime)
 		// https://www.chrismccole.com/blog/logging-in-ue4-cpp
 		// https://unrealcommunity.wiki/logging-lgpidy6i
 		//UE_LOG(LogTemp, Warning, TEXT("Ball name %s is speed %f"), *GetName(), Speed);
+		// Добавляем случайность, если угол близок к 90 градусам
+		AddRandomnessToDirection();
+	}
+}
+
+void ABall::AddRandomnessToDirection()
+{
+	// Определяем угол между текущим направлением и вертикальной осью
+	const FVector VerticalAxis = FVector::UpVector; // Вертикальная ось (Y-ось)
+	const float DotProduct = FVector::DotProduct(Direction, VerticalAxis);
+	const float AngleRadians = FMath::Acos(DotProduct); // Угол в радианах
+	const float AngleDegrees = FMath::RadiansToDegrees(AngleRadians); // Угол в градусах
+
+	// Если угол близок к 90 градусам (например, ±10 градусов), добавляем случайность
+	const float AngleThreshold = 10.0f; // Пороговое значение в градусах
+	if (FMath::Abs(AngleDegrees - 90.0f) <= AngleThreshold)
+	{
+		// Генерируем случайное отклонение
+		const float RandomDeviation = FMath::RandRange(-0.2f, 0.2f); // Случайное число от -0.2 до 0.2
+		Direction.X += RandomDeviation;
+		Direction.Y += RandomDeviation;
+
+		// Нормализуем направление, чтобы сохранить единичную длину
+		Direction = Direction.GetSafeNormal();
 	}
 }
 

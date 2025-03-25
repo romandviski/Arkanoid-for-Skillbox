@@ -36,7 +36,7 @@ void APaddle::SpawnBallLives()
 			NewMeshComponent->SetStaticMesh(Mesh);
 			NewMeshComponent->SetMaterial(0, Material);
 			NewMeshComponent->SetAbsolute(false, false,true);
-			NewMeshComponent->SetWorldScale3D(FVector(0.3f));
+			NewMeshComponent->SetWorldScale3D(FVector(0.3f * DefaultScale.X * 2));
 			NewMeshComponent->SetupAttachment(StaticMesh);
 			NewMeshComponent->RegisterComponent();
 
@@ -50,7 +50,7 @@ void APaddle::SpawnBallLives()
 void APaddle::UpdateBallLivesLocation()
 {
 	// Симметричное расположение шариков, constexpr - вычисляется на этапе компиляции
-	constexpr float BallSpacing = 30.0f; // Расстояние между шариками
+	const float BallSpacing = 30.0f * DefaultScale.X * 2; // Расстояние между шариками
 	const int8 NumBalls = BallLives.Num(); // Количество шариков
 
 	// Учитываем масштаб каретки по оси Y
@@ -108,6 +108,22 @@ void APaddle::OnConstruction(const FTransform& Transform)
 	const FVector TempScale = FVector(GetActorScale().X, GetActorScale().X, GetActorScale().Z);
 	LeftStaticMesh->SetWorldScale3D(TempScale);
 	RightStaticMesh->SetWorldScale3D(TempScale);
+}
+
+void APaddle::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+
+	// Код для обработки изменения свойства
+	if (PropertyChangedEvent.Property != nullptr)
+	{
+		const FName PropertyName = PropertyChangedEvent.Property->GetFName();
+		if (PropertyName == GET_MEMBER_NAME_CHECKED(APaddle, DefaultScale))
+		{
+			// Реагируем на изменение только DefaultScale
+			//Arrow->SetRelativeLocation(FVector(150.0f / DefaultScale.X, 0.0f, 0.0f));
+		}
+	}
 }
 
 void APaddle::BeginPlay()
@@ -194,10 +210,8 @@ void APaddle::SpawnBall()
 {
 	if (BallClass && !CurrentBall)
 	{
-		const FVector SpawnLocation = Arrow->GetComponentLocation();
-		const FRotator SpawnRotation = Arrow->GetComponentRotation();
-
-		CurrentBall = GetWorld()->SpawnActor<ABall>(BallClass, SpawnLocation, SpawnRotation);
+		FTransform SpawnTransform = Arrow->GetComponentTransform();
+		CurrentBall = GetWorld()->SpawnActor<ABall>(BallClass, SpawnTransform);
 
 		if (CurrentBall)
 		{

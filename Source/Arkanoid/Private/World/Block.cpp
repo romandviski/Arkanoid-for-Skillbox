@@ -44,7 +44,7 @@ void ABlock::NotifyHit(class UPrimitiveComponent* MyComp, AActor* Other, class U
 			{
 				if (BonusClass && GetWorld())
 				{
-					const auto CurrentBonus = GetWorld()->SpawnActor<ABonusParent>(BonusClass, GetActorLocation(), GetActorRotation());
+					const auto CurrentBonus = GetWorld()->SpawnActor<ABonusParent>(BonusClass, GetActorLocation(), FRotator::ZeroRotator);
 					//CurrentBonus->InitScale(GetActorScale3D());
 				}
 

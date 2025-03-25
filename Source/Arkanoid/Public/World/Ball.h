@@ -83,8 +83,9 @@ protected:
 	 */
 	UFUNCTION(BlueprintCallable, Category = Ball)
 	void Move(const float DeltaTime);
+	void AddRandomnessToDirection();
 
-//бонусная секция
+	//бонусная секция
 	FTimerHandle TimerBallPower;
 	UPROPERTY()
 	UMaterialInterface* DefaultMaterial = nullptr;
