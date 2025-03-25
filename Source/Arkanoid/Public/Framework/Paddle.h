@@ -54,9 +54,6 @@ public:
 
 protected:
 	virtual void OnConstruction(const FTransform& Transform) override;
-	// Вызывается после изменений в редакторе
-	// Например, когда вы изменяете значение свойства в панели Details в Unreal Editor.
-	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	virtual void BeginPlay() override;
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

@@ -93,6 +93,7 @@ protected:
 	void ResetBallPower();
 
 public:
+	void UpdateDirection();
 	FORCEINLINE int32 GetPower() const { return Power; }
 	/**
 	 * Функция для смены статуса шарика.

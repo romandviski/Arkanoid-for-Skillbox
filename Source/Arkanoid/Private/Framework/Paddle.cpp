@@ -110,22 +110,6 @@ void APaddle::OnConstruction(const FTransform& Transform)
 	RightStaticMesh->SetWorldScale3D(TempScale);
 }
 
-void APaddle::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
-{
-	Super::PostEditChangeProperty(PropertyChangedEvent);
-
-	// Код для обработки изменения свойства
-	if (PropertyChangedEvent.Property != nullptr)
-	{
-		const FName PropertyName = PropertyChangedEvent.Property->GetFName();
-		if (PropertyName == GET_MEMBER_NAME_CHECKED(APaddle, DefaultScale))
-		{
-			// Реагируем на изменение только DefaultScale
-			//Arrow->SetRelativeLocation(FVector(150.0f / DefaultScale.X, 0.0f, 0.0f));
-		}
-	}
-}
-
 void APaddle::BeginPlay()
 {
 	Super::BeginPlay();
@@ -165,7 +149,10 @@ void APaddle::NotifyHit(class UPrimitiveComponent* MyComp, AActor* Other, class 
 		{
 			CurrentBall->SetBallState(EState::Idle);
 			CurrentBall->SetActorLocation(Arrow->GetComponentLocation());
+			CurrentBall->SetActorRotation(Arrow->GetComponentRotation());
+			CurrentBall->UpdateDirection();
 			CurrentBall->AttachToComponent(Arrow, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+			
 		}
 		
 		bIsSticky = false;
@@ -188,8 +175,8 @@ void APaddle::StartGame()
 	{
 		CurrentBall->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 		CurrentBall->SetBallState(EState::Moving);
-		StopBonusStickyEffect();
 		bIsSticky = false;
+		StopBonusStickyEffect();
 	}
 }
 

@@ -51,7 +51,7 @@ void ABall::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	Direction = GetActorForwardVector().GetSafeNormal();
+	UpdateDirection();
 
 	if (StaticMesh)
 	{
@@ -194,6 +194,11 @@ void ABall::ResetBallPower()
 {
 	Power = InitParameters.Power;
 	UpdateBallMaterial();
+}
+
+void ABall::UpdateDirection()
+{
+	Direction = GetActorForwardVector().GetSafeNormal();
 }
 
 void ABall::SetBallState(const EState NewState)
